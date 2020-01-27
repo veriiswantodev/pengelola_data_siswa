@@ -74,7 +74,20 @@ class SiswaController extends Controller
     public function profile($id){
         $siswa = \App\Siswa::find($id);
         $matapelajaran = \App\Mapel::all();
-        return view('siswa.profile', ['siswa' => $siswa, 'matapelajaran' => $matapelajaran]);
+        //Menyiapkan data untuk chart
+
+        $categories = [];
+        $data = [];
+
+        foreach ($matapelajaran as $mp) {
+            if ($siswa->mapel()->wherePivot('mapel_id', $mp->id)->first()) {
+                $categories[] = $mp->nama;
+                $data[] = $siswa->mapel()->wherePivot('mapel_id', $mp->id)->first()->pivot->nilai;
+            }
+        }
+        // dd($data);
+        // dd(json_encode($categories));
+        return view('siswa.profile', ['siswa' => $siswa, 'matapelajaran' => $matapelajaran, 'categories' => $categories, 'data' => $data]);
     }
 
     public function addnilai(Request $request, $idsiswa){
@@ -84,6 +97,11 @@ class SiswaController extends Controller
         }
         $siswa->mapel()->attach($request->mapel, ['nilai'=>$request->nilai]);
         return redirect('siswa/'.$idsiswa.'/profile')->with('sukses','Data Berhasil Ditambahkan');
-        
+    }
+
+    public function deletenilai($idsiswa, $idmapel){
+        $siswa = \App\Siswa::find($idsiswa);
+        $siswa->mapel()->detach($idmapel);
+        return redirect()->back()->with('sukses', 'Data Berhasil Dihapus');
     }
 }

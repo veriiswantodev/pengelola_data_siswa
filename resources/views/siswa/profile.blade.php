@@ -1,6 +1,9 @@
 @extends('layout.main')
 
 @section('title', 'Profile Siswa')
+@section('header')
+		<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+@endsection
 
 @section('content')
     <div class="main">
@@ -80,6 +83,7 @@
 												<th>NAMA</th>
 												<th>SEMESTER</th>
 												<th>NILAI</th>
+												<th>AKSI</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -88,7 +92,9 @@
 												<td>{{$mapel->kode}}</td>
 												<td>{{$mapel->nama}}</td>
 												<td>{{$mapel->semester}}</td>
-												<td>{{$mapel->pivot->nilai}}</td>
+												<td><a href="#" class="chartNilai" data-type="text" data-pk="{{$mapel->id}}" data-url="/api/siswa/{{$siswa->id}}/editnilai" data-title="Masukkan Nilai">{{$mapel->pivot->nilai}}</a>
+												</td>
+												<td><a href="/siswa/{{$siswa->id}}/{{$mapel->id}}/deletenilai" class="btn btn-danger btn-sm" onclick="return confirm('Anda yakin data akan dihapus?')">Hapus</a></td>
 											</tr>
 											@endforeach
 										</tbody>
@@ -96,6 +102,9 @@
 								</div>
 							</div>
 								<!-- END TABBED CONTENT -->
+								<div id="chartNilai">
+
+								</div>
 							</div>
 							<!-- END RIGHT COLUMN -->
 						</div>
@@ -148,4 +157,55 @@
 				</div>
 			</div>
 		</div>
+@endsection
+
+@section('footer')
+		<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+		<script src="https://code.highcharts.com/highcharts.js"></script>
+
+		<script>
+			Highcharts.chart('chartNilai', {
+				chart: {
+						type: 'column'
+				},
+				title: {
+						text: 'Garfik Nilai Siswa'
+				},
+				subtitle: {
+						text: 'By Ayo-Dev'
+				},
+				xAxis: {
+						categories: 
+							{!!json_encode($categories)!!}
+						,
+						crosshair: true
+				},
+				yAxis: {
+						min: 0,
+						title: {
+								text: 'Nilai'
+						}
+				},
+				tooltip: {
+						headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+						footerFormat: '</table>',
+						shared: true,
+						useHTML: true
+				},
+				plotOptions: {
+						column: {
+								pointPadding: 0.2,
+								borderWidth: 0
+						}
+				},
+				series: [{
+						name: 'Nilai',
+						data: {!!json_encode($data)!!}
+				}]
+		});
+
+$(document).ready(function() {
+    $('.chartNilai').editable();
+});
+		</script>
 @endsection
